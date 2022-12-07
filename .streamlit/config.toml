@@ -1,4 +1,4 @@
 [server]
-port = 80
+port = 8031
 enableXsrfProtection=false
 enableCORS=false
