@@ -122,7 +122,7 @@ def video_frame_callback(frame):
 
 muted = st.checkbox("Mute") 
 RTC_CONFIGURATION = RTCConfiguration(
-    {"iceServers": [{"urls": ["turn:turn02.hubl.in?transport=tcp"]}]}
+    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]},{"urls": ["turn:openrelay.metered.ca:80"]}]}
 )
 webrtc_streamer(
     key="pappi", 
