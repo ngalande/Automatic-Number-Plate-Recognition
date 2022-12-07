@@ -10,9 +10,9 @@ import numpy as np
 #import torch
 
 #from torchvision import models
-#import pytesseract # This is the TesseractOCR Python library
+import pytesseract # This is the TesseractOCR Python library
 # Set Tesseract CMD path to the location of tesseract.exe file
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 #from paddleocr import PaddleOCR
 #ocr = PaddleOCR(use_angle_cls=True)
@@ -51,9 +51,9 @@ def enlarge_img(image, scale_percent):
     dim = (width, height)
     resized_image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
     return resized_image
-#def ptModel(img):
-    #results = model(img, size=640)
-    #return results
+# def ptModel(img):
+#     results = model(img, size=640)
+#     return results
 
 
 
@@ -69,18 +69,18 @@ def video_frame_callback(frame):
     # Import Haar Cascade XML file for Russian car plate numbers
     detected_carplate_img = carplate_detect(img)
     
-    #plate = ptModel(img)
-    #plate = carplate_extract(plate_img)
+    # plate = ptModel(img)
+    plate = carplate_extract(plate_img)
     # Convert image to grayscale
-    #carplate_extract_img_gray = cv2.cvtColor(plate, cv2.COLOR_RGB2GRAY)
+    carplate_extract_img_gray = cv2.cvtColor(plate, cv2.COLOR_RGB2GRAY)
     # Display extracted car license plate image
     # Apply median blur
-    #carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # kernel size 3
+    carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # kernel size 3
     # Display the text extracted from the car plate
-    #print(pytesseract.image_to_string(carplate_extract_img_gray_blur, 
-                                  #config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'))
-    #ocr_result = ocr.ocr(carplate_extract_img_gray_blur, cls=True)
-    #print(ocr_result)
+    print(pytesseract.image_to_string(carplate_extract_img_gray_blur, 
+                                  config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'))
+    # ocr_result = ocr.ocr(carplate_extract_img_gray_blur, cls=True)
+    # print(ocr_result)
     return av.VideoFrame.from_ndarray(detected_carplate_img, format="bgr24")
 
 muted = st.checkbox("Mute") 
