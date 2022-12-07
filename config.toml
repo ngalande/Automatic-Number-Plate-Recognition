@@ -1,6 +1,3 @@
-[server]
-port=$PORT
 enableXsrfProtection=false
 enableCORS=false
-headless=true
 enableWebsocketCompression=false
