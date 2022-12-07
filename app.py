@@ -123,10 +123,10 @@ def video_frame_callback(frame):
 
 muted = st.checkbox("Mute") 
 webrtc_streamer(
-    key="example", 
+    key="pappi", 
     video_frame_callback=video_frame_callback,
     rtc_configuration={  # Add this config
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+        "iceServers": [{"urls": ["stun:stun1.l.google.com:19302"]}]
     }
     )
 # webrtc_streamer( key="mute_sample", video_html_attrs=VideoHTMLAttributes( autoPlay=True, controls=True, style={"width": "100%"}, muted=muted ), ) 
