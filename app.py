@@ -1,4 +1,4 @@
-from streamlit_webrtc import webrtc_streamer
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 import av
 import streamlit as st
 #import torch
@@ -8,7 +8,6 @@ import cv2
 import numpy as np
 import ssl, json
 import paho.mqtt.client as paho
-
 #import torch
 
 #from torchvision import models
@@ -122,12 +121,17 @@ def video_frame_callback(frame):
     return av.VideoFrame.from_ndarray(detected_carplate_img, format="bgr24")
 
 muted = st.checkbox("Mute") 
+RTC_CONFIGURATION = RTCConfiguration(
+    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+)
 webrtc_streamer(
     key="pappi", 
     video_frame_callback=video_frame_callback,
-    rtc_configuration={  # Add this config
-        "iceServers": [{"urls": ["stun:stun1.l.google.com:19302"]}]
-    }
+    rtc_configuration=RTC_CONFIGURATION,
+        media_stream_constraints={
+            "video": True,
+            "audio": False
+        }
     )
 # webrtc_streamer( key="mute_sample", video_html_attrs=VideoHTMLAttributes( autoPlay=True, controls=True, style={"width": "100%"}, muted=muted ), ) 
 
