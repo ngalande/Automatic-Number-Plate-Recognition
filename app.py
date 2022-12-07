@@ -50,6 +50,12 @@ carplate_haar_cascade = cv2.CascadeClassifier('./alp_model.xml')
 # client.connect("4eb4a74af4a64aa7b440dd2d2451e924.s2.eu.hivemq.cloud", 8883)
 #client.loop_forever()
 #---------------------------------------------------------------------------------------------
+# import VideoHTMLAttributes 
+# muted = st.checkbox("Mute") 
+# webrtc_streamer( key="mute_sample", video_html_attrs=VideoHTMLAttributes( autoPlay=True, controls=True, style={"width": "100%"}, muted=muted ), ) 
+
+
+
 
 def carplate_detect(image):
         carplate_overlay = image.copy() 
@@ -117,6 +123,8 @@ def video_frame_callback(frame):
 
 muted = st.checkbox("Mute") 
 webrtc_streamer(key="example", video_frame_callback=video_frame_callback)
+# webrtc_streamer( key="mute_sample", video_html_attrs=VideoHTMLAttributes( autoPlay=True, controls=True, style={"width": "100%"}, muted=muted ), ) 
+
 
 hide_streamlit_style = """
             <style>
@@ -124,4 +132,4 @@ hide_streamlit_style = """
             footer {visibility: hidden;}
             </style>
             """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+#st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
