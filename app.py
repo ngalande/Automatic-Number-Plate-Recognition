@@ -26,28 +26,28 @@ import pytesseract # This is the TesseractOCR Python library
 carplate_haar_cascade = cv2.CascadeClassifier('./alp_model.xml')
 #model = cv2.dnn.readNetFromONNX('./best.onnx')
 # ---------------------------------------MQTT Functions-----------------------------------------
-flag_connected = 0
-def on_connect(client, userdata, flags, rc):  
-    global flag_connected
-    flag_connected = 1 
-    print("Connected to the cloud!")
+# flag_connected = 0
+# def on_connect(client, userdata, flags, rc):  
+#     global flag_connected
+#     flag_connected = 1 
+#     print("Connected to the cloud!")
 
-def on_disconnect(client, userdata, rc):
-    global flag_connected
-    flag_connected = 0 
-    print("DISCONNECTED!")
+# def on_disconnect(client, userdata, rc):
+#     global flag_connected
+#     flag_connected = 0 
+#     print("DISCONNECTED!")
 
-    # Defining the mqtt connection  
-client = paho.Client() 
-client.on_connect = on_connect
-client.on_disconnect = on_disconnect
+#     # Defining the mqtt connection  
+# client = paho.Client() 
+# client.on_connect = on_connect
+# client.on_disconnect = on_disconnect
 
-    # Setting the username password
-client.username_pw_set(username='ngalande', password='alprs@pappi')
+#     # Setting the username password
+# client.username_pw_set(username='ngalande', password='alprs@pappi')
 
-    # Connecting to the broker  
-client.tls_set(cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS)
-client.connect("4eb4a74af4a64aa7b440dd2d2451e924.s2.eu.hivemq.cloud", 8883)
+#     # Connecting to the broker  
+# client.tls_set(cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS)
+# client.connect("4eb4a74af4a64aa7b440dd2d2451e924.s2.eu.hivemq.cloud", 8883)
 #client.loop_forever()
 #---------------------------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ def video_frame_callback(frame):
                                   config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
     if(len(ocr_result)>5):
         print(ocr_result)
-        client.publish("alprs/plate", payload=ocr_result, qos=1)
+        #client.publish("alprs/plate", payload=ocr_result, qos=1)
     else:
         print('No Vehicle detected')                         
     # ocr_result = ocr.ocr(carplate_extract_img_gray_blur, cls=True)
