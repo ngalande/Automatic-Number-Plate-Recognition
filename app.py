@@ -122,7 +122,13 @@ def video_frame_callback(frame):
     return av.VideoFrame.from_ndarray(detected_carplate_img, format="bgr24")
 
 muted = st.checkbox("Mute") 
-webrtc_streamer(key="example", video_frame_callback=video_frame_callback)
+webrtc_streamer(
+    key="example", 
+    video_frame_callback=video_frame_callback,
+    rtc_configuration={  # Add this config
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+    }
+    )
 # webrtc_streamer( key="mute_sample", video_html_attrs=VideoHTMLAttributes( autoPlay=True, controls=True, style={"width": "100%"}, muted=muted ), ) 
 
 
@@ -132,4 +138,4 @@ hide_streamlit_style = """
             footer {visibility: hidden;}
             </style>
             """
-#st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
