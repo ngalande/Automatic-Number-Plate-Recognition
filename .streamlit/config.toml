@@ -1,3 +1,4 @@
 [server]
+port = 80
 enableXsrfProtection=false
 enableCORS=false
