@@ -14,7 +14,7 @@ import paho.mqtt.client as paho
 #from torchvision import models
 import pytesseract # This is the TesseractOCR Python library
 # Set Tesseract CMD path to the location of tesseract.exe file
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 #from paddleocr import PaddleOCR
 #ocr = PaddleOCR(use_angle_cls=True)
