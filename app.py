@@ -1,7 +1,7 @@
 from streamlit_webrtc import webrtc_streamer
 import av
 import streamlit as st
-import torch
+#import torch
 #import os
 #from PIL import Image
 import cv2
