@@ -6,6 +6,8 @@ import torch
 #from PIL import Image
 import cv2
 import numpy as np
+import ssl, json
+import paho.mqtt.client as paho
 
 #import torch
 
@@ -23,6 +25,31 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 #model = torch.hub.load('./master/yolov5', 'custom', path = 'best.pt', force_reload=True, source='local')
 carplate_haar_cascade = cv2.CascadeClassifier('./alp_model.xml')
 #model = cv2.dnn.readNetFromONNX('./best.onnx')
+# ---------------------------------------MQTT Functions-----------------------------------------
+flag_connected = 0
+def on_connect(client, userdata, flags, rc):  
+    global flag_connected
+    flag_connected = 1 
+    print("Connected to the cloud!")
+
+def on_disconnect(client, userdata, rc):
+    global flag_connected
+    flag_connected = 0 
+    print("DISCONNECTED!")
+
+    # Defining the mqtt connection  
+client = paho.Client() 
+client.on_connect = on_connect
+client.on_disconnect = on_disconnect
+
+    # Setting the username password
+client.username_pw_set(username='ngalande', password='alprs@pappi')
+
+    # Connecting to the broker  
+client.tls_set(cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS)
+client.connect("4eb4a74af4a64aa7b440dd2d2451e924.s2.eu.hivemq.cloud", 8883)
+#client.loop_forever()
+#---------------------------------------------------------------------------------------------
 
 def carplate_detect(image):
         carplate_overlay = image.copy() 
@@ -77,8 +104,13 @@ def video_frame_callback(frame):
     # Apply median blur
     carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # kernel size 3
     # Display the text extracted from the car plate
-    print(pytesseract.image_to_string(carplate_extract_img_gray_blur, 
-                                  config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'))
+    ocr_result = pytesseract.image_to_string(carplate_extract_img_gray_blur, 
+                                  config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+    if(len(ocr_result)>5):
+        print(ocr_result)
+        client.publish("alprs/plate", payload=ocr_result, qos=1)
+    else:
+        print('No Vehicle detected')                         
     # ocr_result = ocr.ocr(carplate_extract_img_gray_blur, cls=True)
     # print(ocr_result)
     return av.VideoFrame.from_ndarray(detected_carplate_img, format="bgr24")
