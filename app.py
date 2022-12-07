@@ -122,7 +122,7 @@ def video_frame_callback(frame):
 
 muted = st.checkbox("Mute") 
 RTC_CONFIGURATION = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+    {"iceServers": [{"urls": ["turn:turn02.hubl.in?transport=tcp"]}]}
 )
 webrtc_streamer(
     key="pappi", 
