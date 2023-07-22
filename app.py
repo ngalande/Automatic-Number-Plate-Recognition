@@ -1,6 +1,7 @@
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 import av
 import streamlit as st
+import requests
 #import torch
 #import os
 #from PIL import Image
@@ -8,53 +9,17 @@ import cv2
 import numpy as np
 import ssl, json
 import paho.mqtt.client as paho
+# import pika
 #import torch
+import os
 
 #from torchvision import models
 import pytesseract # This is the TesseractOCR Python library
-# Set Tesseract CMD path to the location of tesseract.exe file
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-#from paddleocr import PaddleOCR
-#ocr = PaddleOCR(use_angle_cls=True)
-
-
-# Model - we will use yolov5s
-#model = torch.hub.load('./master/yolov5', 'custom', 'best.onnx')
-#model = torch.hub.load('./master/yolov5', 'custom', path = 'best.pt', force_reload=True, source='local')
 carplate_haar_cascade = cv2.CascadeClassifier('./alp_model.xml')
 #model = cv2.dnn.readNetFromONNX('./best.onnx')
 # ---------------------------------------MQTT Functions-----------------------------------------
-# flag_connected = 0
-# def on_connect(client, userdata, flags, rc):  
-#     global flag_connected
-#     flag_connected = 1 
-#     print("Connected to the cloud!")
-
-# def on_disconnect(client, userdata, rc):
-#     global flag_connected
-#     flag_connected = 0 
-#     print("DISCONNECTED!")
-
-#     # Defining the mqtt connection  
-# client = paho.Client() 
-# client.on_connect = on_connect
-# client.on_disconnect = on_disconnect
-
-#     # Setting the username password
-# client.username_pw_set(username='ngalande', password='alprs@pappi')
-
-#     # Connecting to the broker  
-# client.tls_set(cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS)
-# client.connect("4eb4a74af4a64aa7b440dd2d2451e924.s2.eu.hivemq.cloud", 8883)
-#client.loop_forever()
-#---------------------------------------------------------------------------------------------
-# import VideoHTMLAttributes 
-# muted = st.checkbox("Mute") 
-# webrtc_streamer( key="mute_sample", video_html_attrs=VideoHTMLAttributes( autoPlay=True, controls=True, style={"width": "100%"}, muted=muted ), ) 
-
-
-
+flag_connected = 0
 
 def carplate_detect(image):
         carplate_overlay = image.copy() 
@@ -83,22 +48,12 @@ def enlarge_img(image, scale_percent):
     dim = (width, height)
     resized_image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
     return resized_image
-# def ptModel(img):
-#     results = model(img, size=640)
-#     return results
-
 
 
 def video_frame_callback(frame):
     st.title('Image upload demo')
     img = frame.to_ndarray(format="bgr24")
     plate_img = frame.to_ndarray(format="bgr24")
-    #results = model(img, size=640)
-    # Read car image and convert color to RGB
-    #carplate_img = cv2.imread('./images/car_image.png')
-    #carplate_img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    #plt.imshow(carplate_img_rgb)
-    # Import Haar Cascade XML file for Russian car plate numbers
     detected_carplate_img = carplate_detect(img)
     
     # plate = ptModel(img)
@@ -110,10 +65,23 @@ def video_frame_callback(frame):
     carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # kernel size 3
     # Display the text extracted from the car plate
     ocr_result = pytesseract.image_to_string(carplate_extract_img_gray_blur, 
-                                  config = f'--psm 8 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
-    if(len(ocr_result)>5):
-        print(ocr_result)
-        #client.publish("alprs/plate", payload=ocr_result, qos=1)
+                                  config = '--psm 10 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+    if(len(ocr_result)>6):
+        
+        id = '35e10339-b297-4f25-a915-f1c7179d99a1'
+        payload = {
+            "amount":"20",
+            "number_plate": ocr_result
+            }
+        requests.post("https://etollapi.samwaku.com/api/v1.1/transactions/numberplate-transaction/35e10339-b297-4f25-a915-f1c7179d99a1", payload)
+        print('[DETECTED PLATE]: ', ocr_result)
+        # channel.basic_publish(exchange='',
+        #               routing_key='etolldata',
+        #               body=ocr_result)
+
+        # print(" [x] Data Sent")
+        # connection.close()
+        # client.publish("alprs/plate", payload=ocr_result, qos=1)
     else:
         print('No Vehicle detected')                         
     # ocr_result = ocr.ocr(carplate_extract_img_gray_blur, cls=True)
