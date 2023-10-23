@@ -1,14 +1,14 @@
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 import av
 import streamlit as st
-import requests
+# import requests
 #import torch
 #import os
 #from PIL import Image
 import cv2
-import numpy as np
-import ssl, json
-import paho.mqtt.client as paho
+# import numpy as np
+# import ssl, json
+# import paho.mqtt.client as paho
 # import pika
 #import torch
 import os
@@ -17,16 +17,24 @@ import os
 import pytesseract # This is the TesseractOCR Python library
 
 carplate_haar_cascade = cv2.CascadeClassifier('./alp_model.xml')
-#model = cv2.dnn.readNetFromONNX('./best.onnx')
-# ---------------------------------------MQTT Functions-----------------------------------------
-flag_connected = 0
+hide_streamlit_style = """
+            <style>
+            [data-testid="stToolbar"] {visibility: hidden !important;}
+            footer {visibility: hidden !important;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+st.title("Licence Plate Recognition")
 
-def carplate_detect(image):
+def carplate_detect(image, ocr_plate):
         carplate_overlay = image.copy() 
         carplate_rects = carplate_haar_cascade.detectMultiScale(carplate_overlay,scaleFactor=1.1, minNeighbors=5)
         for x,y,w,h in carplate_rects: 
             cv2.rectangle(carplate_overlay, (x,y), (x+w,y+h), (0,255,0), 2) 
             carplate_img = image[y+15:y+h-10 ,x+15:x+w-20] # Adjusted to extract specific region of interest i.e. car license plate
+                    # Draw the detected license plate text
+            cv2.putText(carplate_overlay, 'Licence Plate: '+ str(ocr_plate), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
             
             
         return carplate_overlay
@@ -54,7 +62,6 @@ def video_frame_callback(frame):
     st.title('Image upload demo')
     img = frame.to_ndarray(format="bgr24")
     plate_img = frame.to_ndarray(format="bgr24")
-    detected_carplate_img = carplate_detect(img)
     
     # plate = ptModel(img)
     plate = carplate_extract(plate_img)
@@ -64,31 +71,20 @@ def video_frame_callback(frame):
     # Apply median blur
     carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # kernel size 3
     # Display the text extracted from the car plate
-    ocr_result = pytesseract.image_to_string(carplate_extract_img_gray_blur, 
+    ocr_result = pytesseract.image_to_string(carplate_extract_img_gray_blur, lang='eng',
                                   config = '--psm 10 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+    detected_carplate_img = carplate_detect(img, ocr_result)
     if(len(ocr_result)>6):
         
-        id = '35e10339-b297-4f25-a915-f1c7179d99a1'
-        payload = {
-            "amount":"20",
-            "number_plate": ocr_result
-            }
-        requests.post("https://etollapi.samwaku.com/api/v1.1/transactions/numberplate-transaction/35e10339-b297-4f25-a915-f1c7179d99a1", payload)
         print('[DETECTED PLATE]: ', ocr_result)
-        # channel.basic_publish(exchange='',
-        #               routing_key='etolldata',
-        #               body=ocr_result)
 
-        # print(" [x] Data Sent")
-        # connection.close()
-        # client.publish("alprs/plate", payload=ocr_result, qos=1)
     else:
         print('No Vehicle detected')                         
     # ocr_result = ocr.ocr(carplate_extract_img_gray_blur, cls=True)
     # print(ocr_result)
     return av.VideoFrame.from_ndarray(detected_carplate_img, format="bgr24")
 
-muted = st.checkbox("Mute") 
+
 RTC_CONFIGURATION = RTCConfiguration(
     {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
 )
@@ -104,10 +100,3 @@ webrtc_streamer(
 # webrtc_streamer( key="mute_sample", video_html_attrs=VideoHTMLAttributes( autoPlay=True, controls=True, style={"width": "100%"}, muted=muted ), ) 
 
 
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
