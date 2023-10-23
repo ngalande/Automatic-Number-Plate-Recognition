@@ -13,6 +13,7 @@ import cv2
 #import torch
 import os
 
+
 #from torchvision import models
 import pytesseract # This is the TesseractOCR Python library
 
