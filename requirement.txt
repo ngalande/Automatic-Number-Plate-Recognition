@@ -1,5 +1,8 @@
 av==9.2.0
 numpy==1.23.0
 opencv_python_headless==4.6.0.66
+paho_mqtt==1.6.1
+pytesseract==0.3.9
 streamlit==1.11.1
-streamlit_webrtc==0.43.0
+streamlit_webrtc==0.44.0
+pytesseract===5.0.0
