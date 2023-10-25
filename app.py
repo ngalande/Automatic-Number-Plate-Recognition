@@ -1,21 +1,12 @@
 from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 import av
 import streamlit as st
-# import requests
-#import torch
-#import os
-#from PIL import Image
 import cv2
-# import numpy as np
-# import ssl, json
-# import paho.mqtt.client as paho
-# import pika
-#import torch
-import os
+import re
 
-
-#from torchvision import models
-import pytesseract # This is the TesseractOCR Python library
+from paddleocr import PaddleOCR
+PaddleOCR(show_log = False) 
+ocr = PaddleOCR(use_angle_cls=True, lang='en')
 
 carplate_haar_cascade = cv2.CascadeClassifier('./alp_model.xml')
 hide_streamlit_style = """
@@ -44,9 +35,12 @@ def carplate_detect(image, ocr_plate):
 # Create function to retrieve only the car plate region itself
 def carplate_extract(image):
     carplate_img = image
+    carplate_overlay = image.copy() 
     carplate_rects = carplate_haar_cascade.detectMultiScale(image,scaleFactor=1.1, minNeighbors=5)
     for x,y,w,h in carplate_rects: 
+        cv2.rectangle(carplate_overlay, (x,y), (x+w,y+h), (0,255,0), 1) 
         carplate_img = image[y+15:y+h-10 ,x+15:x+w-20] # Adjusted to extract specific region of interest i.e. car license plate
+        # cv2.imwrite('carplate_with_bbox.png', carplate_overlay)
             
     return carplate_img
 
@@ -70,16 +64,32 @@ def video_frame_callback(frame):
     carplate_extract_img_gray = cv2.cvtColor(plate, cv2.COLOR_RGB2GRAY)
     # Display extracted car license plate image
     # Apply median blur
-    carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,3) # kernel size 3
+    # carplate_extract_img_gray_blur = cv2.medianBlur(carplate_extract_img_gray,1) # kernel size 3
     # Display the text extracted from the car plate
-    ocr_result = pytesseract.image_to_string(carplate_extract_img_gray_blur, lang='eng',
-                                  config = '--psm 10 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
-    detected_carplate_img = carplate_detect(img, ocr_result)
-    if(len(ocr_result)>6):
+    # ocr_result = pytesseract.image_to_string(carplate_extract_img_gray_blur, lang='eng',
+    #                               config = '--psm 10 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+    # pattern = r'[A-Z0-9]+'
+
+    # # Apply the regular expression to the OCR result
+    # filtered_result = re.findall(pattern, ocr_result)
+
+    # # Join the matched characters and digits to form the cleaned result
+    # cleaned_result = ''.join(filtered_result)
+    result = ocr.ocr(carplate_extract_img_gray)
+    ocr_result = ''
+    for idx in range(len(result)):
+        res = result[idx]
+        for line in res:
+            # print(line[0])
+            ocr_result = line[0]
+    # print(cleaned_result)
+    if(len(ocr_result)>5):
         
+        detected_carplate_img = carplate_detect(img, ocr_result)
         print('[DETECTED PLATE]: ', ocr_result)
 
     else:
+        detected_carplate_img = carplate_detect(img, 'Unable to perform OCR')
         print('No Vehicle detected')                         
     # ocr_result = ocr.ocr(carplate_extract_img_gray_blur, cls=True)
     # print(ocr_result)
