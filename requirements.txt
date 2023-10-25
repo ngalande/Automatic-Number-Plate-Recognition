@@ -5,4 +5,4 @@ pytesseract==0.3.9
 streamlit==1.11.1
 streamlit_webrtc==0.47.1
 paddleocr
-opencv-python-headless
+opencv_python_headless==4.6.0.66
