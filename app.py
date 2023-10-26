@@ -77,17 +77,21 @@ def video_frame_callback(frame):
     # cleaned_result = ''.join(filtered_result)
     result = ocr.ocr(carplate_extract_img_gray)
     ocr_result = ''
+    ocr_accuracy = 0
     for idx in range(len(result)):
         res = result[idx]
         for line in res:
             # print(line[0])
             ocr_result = line[0]
-    # print(cleaned_result)
+            ocr_accuracy = line[1]
+    # print(ocr_accuracy)
     if(len(ocr_result)>5):
-        
-        detected_carplate_img = carplate_detect(img, ocr_result)
-        print('[DETECTED PLATE]: ', ocr_result)
-
+        if(ocr_accuracy > 0.6):         
+            detected_carplate_img = carplate_detect(img, ocr_result)
+            print('[DETECTED PLATE]: ', ocr_result)
+        else:
+            detected_carplate_img = carplate_detect(img, 'Unable to perform OCR')
+            print('No Vehicle detected')   
     else:
         detected_carplate_img = carplate_detect(img, 'Unable to perform OCR')
         print('No Vehicle detected')                         
